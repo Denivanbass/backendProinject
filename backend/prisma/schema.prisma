@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model cavidade {
+  id_cavidade Int          @unique(map: "id_cavidade_UNIQUE") @default(autoincrement())
+  number      Int
+  status      String       @db.VarChar(45)
+  id_molde    Int
+  id_versao   Int
+  updated_at  DateTime     @db.Date
+  molde       molde        @relation(fields: [id_molde], references: [id_molde], onDelete: NoAction, onUpdate: NoAction, map: "fk_table_cavidade_table_molde1")
+  versao      versao       @relation(fields: [id_versao], references: [id_versao], onDelete: NoAction, onUpdate: NoAction, map: "fk_table_cavidade_table_versao1")
+  ocorrencia  ocorrencia[]
+
+  @@id([id_cavidade, id_molde, id_versao])
+  @@index([id_molde], map: "fk_table_cavidade_table_molde1_idx")
+  @@index([id_versao], map: "fk_table_cavidade_table_versao1_idx")
+}
+
+model colaborador {
+  id_colaborador Int          @id @unique(map: "id_colaborador_UNIQUE") @default(autoincrement())
+  nome           String       @db.VarChar(45)
+  cargo          String?      @db.VarChar(45)
+  ocorrencia     ocorrencia[]
+}
+
+model defeito {
+  id_defeito        Int          @id @default(autoincrement())
+  descricao_defeito String       @db.VarChar(45)
+  ocorrencia        ocorrencia[]
+}
+
+model molde {
+  id_molde    Int        @id @unique(map: "id_molde_UNIQUE") @default(autoincrement())
+  cod_molde   String     @db.VarChar(45)
+  description String     @db.VarChar(45)
+  cavidade    cavidade[]
+}
+
+model ocorrencia {
+  id_ocorrencia     Int         @id @unique(map: "id_ocorrencia_UNIQUE") @default(autoincrement())
+  id_cavidade       Int
+  id_colaborador    Int
+  id_defeito        Int
+  status_ocorrencia String      @db.VarChar(45)
+  created_at        DateTime    @db.Date
+  defeito           defeito     @relation(fields: [id_defeito], references: [id_defeito], onDelete: NoAction, onUpdate: NoAction, map: "fk_ocorrencia_defeito1")
+  cavidade          cavidade    @relation(fields: [id_cavidade], references: [id_cavidade], onDelete: NoAction, onUpdate: NoAction, map: "fk_table_ocorrencia_table_cavidade1")
+  colaborador       colaborador @relation(fields: [id_colaborador], references: [id_colaborador], onDelete: NoAction, onUpdate: NoAction, map: "fk_table_ocorrencia_table_colaborador1")
+
+  @@index([id_defeito], map: "fk_ocorrencia_defeito1_idx")
+  @@index([id_cavidade], map: "fk_table_ocorrencia_table_cavidade1_idx")
+  @@index([id_colaborador], map: "fk_table_ocorrencia_table_colaborador1_idx")
+}
+
+model versao {
+  id_versao Int        @id @unique(map: "id_versao_UNIQUE") @default(autoincrement())
+  versao    String     @db.VarChar(45)
+  cavidade  cavidade[]
+}

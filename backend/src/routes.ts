@@ -47,6 +47,8 @@ router.get('/ocorrencias', new OcorrenciasController().handle) // ok
 router.post('/ocorrencia/registro', new CreateOcorrenciaController().handle) // ok
 router.put('/abrircavidade', new AbrirCavidadeController().handle)// ok
 
-
+router.get("/ping", (req, res) => {
+  return res.status(200).json({ status: "ok", message: "Servidor respondendo!" });
+});
 
 export { router }; 

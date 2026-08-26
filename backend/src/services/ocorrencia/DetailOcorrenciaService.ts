@@ -14,13 +14,16 @@ class DetailOcorrenciaService {
             include: {
                 cavidade: {
                     include: {
-                        versao: true,
-                        molde: true,
+                        versao: {
+                            include: {
+                                molde: true
+                            }
+                        }
                     }
                 },
                 colaborador: true
+            }
 
-            },
 
         });
 

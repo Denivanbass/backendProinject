@@ -8,15 +8,18 @@ class OcorrenciasService {
 
 
         const ocorrencia = await prisma.ocorrencia.findMany({
-            include:{
-                cavidade:{
+            include: {
+                cavidade: {
                     include: {
-                        molde: true,
-                        versao: true,
+                        versao: {
+                            include: {
+                                molde: true
+                            }
+                        }
                     }
-                }, 
-                colaborador:true,
-
+                },
+                colaborador: true,
+                defeito: true // <--- ADICIONE ESTA LINHA para trazer os dados do colaborador
             }
         });
 

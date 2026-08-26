@@ -11,22 +11,21 @@ model cavidade {
   id_cavidade Int          @unique(map: "id_cavidade_UNIQUE") @default(autoincrement())
   number      Int
   status      String       @db.VarChar(45)
-  id_molde    Int
   id_versao   Int
   updated_at  DateTime     @db.Date
-  molde       molde        @relation(fields: [id_molde], references: [id_molde], onDelete: NoAction, onUpdate: NoAction, map: "fk_table_cavidade_table_molde1")
   versao      versao       @relation(fields: [id_versao], references: [id_versao], onDelete: NoAction, onUpdate: NoAction, map: "fk_table_cavidade_table_versao1")
   ocorrencia  ocorrencia[]
 
-  @@id([id_cavidade, id_molde, id_versao])
-  @@index([id_molde], map: "fk_table_cavidade_table_molde1_idx")
+  @@id([id_cavidade, id_versao])
   @@index([id_versao], map: "fk_table_cavidade_table_versao1_idx")
 }
 
 model colaborador {
   id_colaborador Int          @id @unique(map: "id_colaborador_UNIQUE") @default(autoincrement())
   nome           String       @db.VarChar(45)
+  email          String       @unique(map: "email_UNIQUE") @db.VarChar(45)
   cargo          String?      @db.VarChar(45)
+  password_hash  String       @db.VarChar(100)
   ocorrencia     ocorrencia[]
 }
 
@@ -37,10 +36,10 @@ model defeito {
 }
 
 model molde {
-  id_molde    Int        @id @unique(map: "id_molde_UNIQUE") @default(autoincrement())
-  cod_molde   String     @db.VarChar(45)
-  description String     @db.VarChar(45)
-  cavidade    cavidade[]
+  id_molde    Int      @id @unique(map: "id_molde_UNIQUE") @default(autoincrement())
+  cod_molde   String   @db.VarChar(45)
+  description String   @db.VarChar(45)
+  versao      versao[]
 }
 
 model ocorrencia {
@@ -60,7 +59,12 @@ model ocorrencia {
 }
 
 model versao {
-  id_versao Int        @id @unique(map: "id_versao_UNIQUE") @default(autoincrement())
+  id_versao Int        @unique(map: "id_versao_UNIQUE") @default(autoincrement())
+  id_molde  Int
   versao    String     @db.VarChar(45)
   cavidade  cavidade[]
+  molde     molde      @relation(fields: [id_molde], references: [id_molde], onDelete: NoAction, onUpdate: NoAction, map: "fk_versao_molde1")
+
+  @@id([id_versao, id_molde])
+  @@index([id_molde], map: "fk_versao_molde1_idx")
 }

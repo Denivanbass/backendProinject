@@ -16,7 +16,7 @@ class BuscarMoldeService {
             })
 
             const versao = await tx.versao.findFirst({
-                where: { versao: codigo_versao },
+                where: { id_molde: molde?.id_molde, versao: codigo_versao },
                 select: { id_versao: true }
             })
 
@@ -25,28 +25,31 @@ class BuscarMoldeService {
                 throw new Error('Molde ou cavidade não encontrado.')
             }
 
-            const moldeRetornado = await tx.cavidade.findMany({
+            const moldeRetornado = await tx.versao.findUnique({
                 where: {
-                    id_molde: molde.id_molde,
-                    id_versao: versao.id_versao,
+                    id_versao: versao.id_versao
                 },
-                select: {
-                    number: true,
-                    status: true,
-                    versao: {
+                include: {
+                    molde: {
                         select: {
-                            versao: true
+                            id_molde: true,
+                            cod_molde: true,
+                            description: true
                         }
                     },
-                    molde: {
-                        select: { cod_molde: true }
+                    cavidade: {
+                        select: {
+                            number: true,
+                            status: true
+                        }
                     }
                 }
 
+            });
 
-            })
-            
+
             return (moldeRetornado)
+
 
         })
 

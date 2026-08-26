@@ -1,12 +1,10 @@
 import { Router } from 'express';
 
-import { CreateMoldeController } from './controllers/molde/CreateMoldeController.js';
+
 import { CreateColaboradorController } from './controllers/colaborador/CreateColaboradorController.js';
-import { CreateCavidadeController } from './controllers/cavidade/CreateCavidadeController.js';
 import { CreateOcorrenciaController } from './controllers/ocorrencia/CreateOcorrenciaController.js';
 import { DetailOcorrenciaController } from './controllers/ocorrencia/DetailOcorrenciaController.js';
 import { OcorrenciasController } from './controllers/ocorrencia/OcorrenciasController.js';
-import { CreateVersionController } from './controllers/versao/CreateVersionController.js';
 import { BuscarMoldeController } from './controllers/molde/BuscarMoldeController.js';
 import { BuscarCavFechadaController } from './controllers/molde/BuscarCavFechadas.js';
 import { BuscarColaboradorController } from './controllers/colaborador/BuscarColaboradorController.js';
@@ -15,39 +13,39 @@ import { CreateDefeitoController } from './controllers/defeitos/CreateDefeitoCon
 import { AbrirCavidadeController } from './controllers/ocorrencia/AbrirCavidadeController.js';
 import { BuscarTodosMoldesController } from './controllers/molde/BuscarTodosMoldesController.js';
 import { ExcluirMoldeController } from './controllers/molde/ExcluirMoldeController.js';
+import { LoginController } from './controllers/login/LoginController.js';
+import { CreateMoldeVersaoController } from './controllers/molde/CreateMoldeVersaoController.js';
+import Auth from './middlewares/Auth.js';
 
 
 const router = Router();
 
 
 // Molde:
-router.post('/molde/cadastro', new CreateMoldeController().handle)
-router.get('/molde/:codigo_molde/:codigo_versao', new BuscarMoldeController().handle)
-router.get('/fechada/:codigo_molde/:codigo_versao', new BuscarCavFechadaController().handle)
-router.get('/moldes', new BuscarTodosMoldesController().handle)
-router.delete('/molde/excluir', new ExcluirMoldeController().handle)
 
-
-// Cavidade:
-router.post('/cavidade/cadastro', new CreateCavidadeController().handle)
-
-// Versão:
-router.post('/versao', new CreateVersionController().handle)
+router.post('/molde/register', new CreateMoldeVersaoController().handle) // ok
+router.get('/moldes',  new BuscarTodosMoldesController().handle) // ok
+router.get('/molde/:codigo_molde/:codigo_versao', new BuscarMoldeController().handle) // ok
+router.get('/fechada/:codigo_molde/:codigo_versao', new BuscarCavFechadaController().handle) // ok
+router.delete('/molde/excluir', new ExcluirMoldeController().handle) // ok
 
 
 // Colaboradores:
-router.get('/colaborador/', new BuscarColaboradorController().handle)
-router.post('/colaborador/cadastro', new CreateColaboradorController().handle)
+router.get('/colaborador', new BuscarColaboradorController().handle) // ok
+router.post('/colaborador/cadastro', new CreateColaboradorController().handle) // ok
+
+// Login:
+router.post('/login', new LoginController().handle) // ok
 
 // Defeitos:
-router.get('/defeitos', new BuscarDefeitosController().handle)
-router.post('/defeitos', new CreateDefeitoController().handle)
+router.get('/defeitos', new BuscarDefeitosController().handle) // ok
+router.post('/defeitos', new CreateDefeitoController().handle) // ok
 
 // Rotas para ocorrencias
-router.get('/ocorrencia', new DetailOcorrenciaController().handle)
-router.get('/ocorrencias', new OcorrenciasController().handle)
-router.post('/ocorrencia/registro', new CreateOcorrenciaController().handle)
-router.put('/abrircavidade', new AbrirCavidadeController().handle)
+router.get('/ocorrencia', new DetailOcorrenciaController().handle) // ok
+router.get('/ocorrencias', new OcorrenciasController().handle) // ok
+router.post('/ocorrencia/registro', new CreateOcorrenciaController().handle) // ok
+router.put('/abrircavidade', new AbrirCavidadeController().handle)// ok
 
 
 

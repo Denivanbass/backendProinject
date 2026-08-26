@@ -17,16 +17,18 @@ class CreateOcorrenciaService {
 
 
         const createOcorrencia = await prisma.$transaction(async (tx) => {
-            const cavidadeEncontrada = await tx.cavidade.findFirst({
-                where: {
-                    number: num_cav,
-                    molde: { cod_molde: codigo_molde },
-                    versao: { versao: versao },
-                },
-                select: { id_cavidade: true }
+            const molde = await tx.molde.findFirst({
+                where: { cod_molde: codigo_molde }, select: { id_molde:true }
             })
+            const versaoEcontrada = await tx.versao.findFirst({
+                where: { versao: versao, id_molde: molde?.id_molde }, select: { id_versao:true }
+            })
+            const cavidadeEncontrada = await tx.cavidade.findFirst({
+                where: { id_versao: versaoEcontrada?.id_versao, number: num_cav }, select: { id_cavidade: true }
+            })
+           
 
-            if (!cavidadeEncontrada) {
+            if (!molde || !versaoEcontrada || !cavidadeEncontrada) {
                 throw new Error("Cavidade não encontrada para este molde.")
             }
 

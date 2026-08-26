@@ -11,7 +11,7 @@ class BuscarColaboradorController {
 
         const colaboradores = await buscarColaboradorService.execute()
 
-        return res.json(colaboradores)
+        return res.json(colaboradores).status(200)
     }
 }
 export  { BuscarColaboradorController }

@@ -1,11 +1,20 @@
 import "dotenv/config";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client.js";
 
-// Evita recriar o pool de conexões em cada requisição (Singleton Pattern)
+const adapter = new PrismaMariaDb({
+  host: process.env.DATABASE_HOST || "127.0.0.1",
+  port: Number(process.env.DATABASE_PORT) || 3306,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  connectionLimit: 5,
+});
+
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 export const prisma =
   globalForPrisma.prisma ||
-  new (PrismaClient as any)();
+  new PrismaClient({ adapter } as any);
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

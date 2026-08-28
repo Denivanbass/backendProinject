@@ -1,53 +1,55 @@
-// Arquivo Servidor
-
-
-import express, { Request, Response, NextFunction } from 'express';
-import { router } from './routes.js';
-import cors from 'cors';
-import path from 'path';
-
-
-console.log("NODE VERSION:", process.version);
-console.log("NODE EXEC PATH:", process.execPath);
-
-
-console.log("DATABASE_HOST:", process.env.DATABASE_HOST);
-console.log("DATABASE_PORT:", process.env.DATABASE_PORT);
-console.log("DATABASE_USER:", process.env.DATABASE_USER);
-console.log("DATABASE_NAME:", process.env.DATABASE_NAME);
-console.log("DATABASE_URL HOST:", process.env.DATABASE_URL?.split("@")[1]);
-
+import "dotenv/config";
+import express from "express";
+import net from "node:net";
 
 const app = express();
-app.use(express.json());
-app.use(cors())
 
-app.use(router);
-
-app.use(
-    '/files',
-    express.static(path.resolve(__dirname, '..', 'tmp'))
-)
-
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    if (err instanceof Error) {
-        return res.status(400).json({
-            error: err.message
-        })
-    }
-    return res.status(500).json({
-        status: 'error',
-        message:'Internal server error.'
-    })
-})
-
-// 1. Convertemos a porta para Número puro (Number)
-const PORT = process.env.PORT ? Number(process.env.PORT) : 3333;
-
-
-app.listen(PORT, () => {
-    console.log(`Servidor Rodando na porta ${PORT}!!`);
+app.get("/", (req, res) => {
+  res.json({
+    message: "API funcionando!",
+  });
 });
 
+app.listen(3333, () => {
+  console.log("Servidor Rodando na porta 3333!!");
 
-// Senha do banco de dados postgreSQL: user: admin   | senha: admin
+  testarConexaoTCP();
+});
+
+function testarConexaoTCP() {
+  const host = process.env.DATABASE_HOST;
+  const port = Number(process.env.DATABASE_PORT || 3306);
+
+  console.log(`🔄 Testando conexão TCP: ${host}:${port}`);
+
+  const socket = new net.Socket();
+
+  socket.setTimeout(15000);
+
+  socket.on("connect", () => {
+    console.log("✅ TCP CONECTOU AO MYSQL!");
+    console.log("A Hostinger consegue alcançar o servidor MySQL.");
+
+    socket.destroy();
+  });
+
+  socket.on("timeout", () => {
+    console.log("❌ TCP TIMEOUT!");
+    console.log(
+      "A Hostinger não conseguiu estabelecer conexão com o MySQL."
+    );
+
+    socket.destroy();
+  });
+
+  socket.on("error", (error) => {
+    console.log("❌ ERRO TCP:", error.message);
+
+    socket.destroy();
+  });
+
+  socket.connect({
+    host,
+    port,
+  });
+}

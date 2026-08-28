@@ -1,11 +1,26 @@
 import express from "express";
 import { prisma } from "./lib/prisma.js";
-
+import { BuscarColaboradorController } from "./controllers/colaborador/BuscarColaboradorController.js";
+import { router } from "./routes.js";
 const app = express();
 
-async function startServer() {
+app.use(express.json());
+
+// suas rotas
+// app.use("/users", userRoutes);
+// app.use("/auth", authRoutes);
+// etc.
+router.get('/colaborador', new BuscarColaboradorController().handle) // ok
+
+app.listen(3333, () => {
+  console.log("Servidor Rodando na porta 3333!!");
+
+  testDatabase();
+});
+
+async function testDatabase() {
   try {
-    console.log("🔄 Conectando ao MySQL...");
+    console.log("🔄 Testando conexão com MySQL...");
 
     await prisma.$connect();
 
@@ -14,16 +29,8 @@ async function startServer() {
     const result = await prisma.$queryRaw`SELECT 1 AS result`;
 
     console.log("✅ Banco respondeu:", result);
-
-    app.listen(3333, () => {
-      console.log("Servidor Rodando na porta 3333!!");
-    });
   } catch (error) {
     console.error("❌ Falha no banco:");
     console.error(error);
-
-    process.exit(1);
   }
 }
-
-startServer();

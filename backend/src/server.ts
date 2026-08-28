@@ -1,42 +1,23 @@
-// Arquivo Servidor
-
-
-import express, { Request, Response, NextFunction } from 'express';
-import { router } from './routes.js';
-import cors from 'cors';
-import path from 'path';
-
+import express from "express";
+import { prisma } from "./lib/prisma.js";
 
 const app = express();
-app.use(express.json());
-app.use(cors())
 
-app.use(router);
+try {
+  console.log("🔄 Conectando ao MySQL...");
 
-app.use(
-    '/files',
-    express.static(path.resolve(__dirname, '..', 'tmp'))
-)
+  await prisma.$connect();
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    if (err instanceof Error) {
-        return res.status(400).json({
-            error: err.message
-        })
-    }
-    return res.status(500).json({
-        status: 'error',
-        message:'Internal server error.'
-    })
-})
+  console.log("✅ MySQL conectado!");
 
-// 1. Convertemos a porta para Número puro (Number)
-const PORT = process.env.PORT ? Number(process.env.PORT) : 3333;
+  const result = await prisma.$queryRaw`SELECT 1 AS result`;
 
+  console.log("✅ Banco respondeu:", result);
+} catch (error) {
+  console.error("❌ Falha no banco:");
+  console.error(error);
+}
 
-app.listen(PORT, () => {
-    console.log(`Servidor Rodando na porta ${PORT}!!`);
+app.listen(3333, () => {
+  console.log("Servidor Rodando na porta 3333!!");
 });
-
-
-// Senha do banco de dados postgreSQL: user: admin   | senha: admin

@@ -11,7 +11,7 @@ class BuscarDefeitosController {
         const defeitos = await buscarDefeitosService.execute()
 
 
-        return res.json(defeitos)
+        return res.status(200).json(defeitos)
     }
 }
 

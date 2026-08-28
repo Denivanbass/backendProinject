@@ -3,8 +3,8 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client.js";
 
 const adapter = new PrismaMariaDb({
-  host: process.env.DATABASE_HOST || "127.0.0.1",
-  port: Number(process.env.DATABASE_PORT) || 3306,
+  host: process.env.DATABASE_HOST,
+  port: Number(process.env.DATABASE_PORT || 3306),
   user: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
@@ -12,5 +12,17 @@ const adapter = new PrismaMariaDb({
 });
 
 const prisma = new PrismaClient({ adapter });
+
+
+
+
+
+console.log({
+  host: process.env.DATABASE_HOST,
+  port: process.env.DATABASE_PORT,
+  user: process.env.DATABASE_USER,
+  database: process.env.DATABASE_NAME,
+});
+
 
 export { prisma };

@@ -3,21 +3,27 @@ import { prisma } from "./lib/prisma.js";
 
 const app = express();
 
-try {
-  console.log("🔄 Conectando ao MySQL...");
+async function startServer() {
+  try {
+    console.log("🔄 Conectando ao MySQL...");
 
-  await prisma.$connect();
+    await prisma.$connect();
 
-  console.log("✅ MySQL conectado!");
+    console.log("✅ MySQL conectado!");
 
-  const result = await prisma.$queryRaw`SELECT 1 AS result`;
+    const result = await prisma.$queryRaw`SELECT 1 AS result`;
 
-  console.log("✅ Banco respondeu:", result);
-} catch (error) {
-  console.error("❌ Falha no banco:");
-  console.error(error);
+    console.log("✅ Banco respondeu:", result);
+
+    app.listen(3333, () => {
+      console.log("Servidor Rodando na porta 3333!!");
+    });
+  } catch (error) {
+    console.error("❌ Falha no banco:");
+    console.error(error);
+
+    process.exit(1);
+  }
 }
 
-app.listen(3333, () => {
-  console.log("Servidor Rodando na porta 3333!!");
-});
+startServer();

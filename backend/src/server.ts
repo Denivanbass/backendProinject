@@ -1,55 +1,52 @@
 import "dotenv/config";
 import express from "express";
-import net from "node:net";
+import mariadb from "mariadb";
 
 const app = express();
 
 app.get("/", (req, res) => {
-  res.json({
-    message: "API funcionando!",
-  });
+  res.json({ message: "API funcionando!" });
 });
 
 app.listen(3333, () => {
   console.log("Servidor Rodando na porta 3333!!");
-
-  testarConexaoTCP();
+  testarMariaDB();
 });
 
-function testarConexaoTCP() {
-  const host = process.env.DATABASE_HOST;
-  const port = Number(process.env.DATABASE_PORT || 3306);
+async function testarMariaDB() {
+  let connection;
 
-  console.log(`🔄 Testando conexão TCP: ${host}:${port}`);
+  try {
+    console.log("🔄 Testando autenticação MySQL...");
 
-  const socket = new net.Socket();
+    const pool = mariadb.createPool({
+      host: process.env.DATABASE_HOST!,
+      port: Number(process.env.DATABASE_PORT || 3306),
+      user: process.env.DATABASE_USER!,
+      password: process.env.DATABASE_PASSWORD!,
+      connectionLimit: 1,
+      connectTimeout: 10000,
+      acquireTimeout: 10000,
+    });
 
-  socket.setTimeout(15000);
+    console.log("🔄 Obtendo conexão...");
 
-  socket.on("connect", () => {
-    console.log("✅ TCP CONECTOU AO MYSQL!");
-    console.log("A Hostinger consegue alcançar o servidor MySQL.");
+    connection = await pool.getConnection();
 
-    socket.destroy();
-  });
+    console.log("✅ AUTENTICAÇÃO MYSQL FUNCIONOU!");
 
-  socket.on("timeout", () => {
-    console.log("❌ TCP TIMEOUT!");
-    console.log(
-      "A Hostinger não conseguiu estabelecer conexão com o MySQL."
-    );
+    const result = await connection.query("SELECT 1 AS result");
 
-    socket.destroy();
-  });
+    console.log("✅ SELECT FUNCIONOU:", result);
 
-  socket.on("error", (error) => {
-    console.log("❌ ERRO TCP:", error.message);
+    connection.release();
+    await pool.end();
+  } catch (error) {
+    console.error("❌ FALHA:");
+    console.error(error);
 
-    socket.destroy();
-  });
-
-  socket.connect({
-    host,
-    port,
-  });
+    if (connection) {
+      connection.release();
+    }
+  }
 }

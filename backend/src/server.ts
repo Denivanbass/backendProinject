@@ -26,11 +26,15 @@ async function testDatabase() {
 
     console.log("✅ MySQL conectado!");
 
+    console.log("🔄 Executando SELECT 1...");
+
     const result = await prisma.$queryRaw`SELECT 1 AS result`;
 
-    console.log("✅ Banco respondeu:", result);
+    console.log("✅ SELECT 1 respondeu:", result);
   } catch (error) {
     console.error("❌ Falha no banco:");
     console.error(error);
   }
 }
+
+

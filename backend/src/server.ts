@@ -1,6 +1,5 @@
-import "dotenv/config";
 import express from "express";
-import mariadb from "mariadb";
+import net from "node:net";
 
 const app = express();
 
@@ -10,43 +9,38 @@ app.get("/", (req, res) => {
 
 app.listen(3333, () => {
   console.log("Servidor Rodando na porta 3333!!");
-  testarMariaDB();
+  testarMySQL();
 });
 
-async function testarMariaDB() {
-  let connection;
+function testarMySQL() {
+  const socket = new net.Socket();
 
-  try {
-    console.log("🔄 Testando autenticação MySQL...");
+  socket.setTimeout(10000);
 
-    const pool = mariadb.createPool({
-      host: process.env.DATABASE_HOST!,
-      port: Number(process.env.DATABASE_PORT || 3306),
-      user: process.env.DATABASE_USER!,
-      password: process.env.DATABASE_PASSWORD!,
-      connectionLimit: 1,
-      connectTimeout: 10000,
-      acquireTimeout: 10000,
+  socket.on("connect", () => {
+    console.log("✅ TCP conectado!");
+    console.log("⏳ Aguardando resposta do servidor MySQL...");
+
+    socket.once("data", (data) => {
+      console.log("📦 Resposta recebida do MySQL:");
+      console.log(data.toString("hex"));
+
+      socket.destroy();
     });
+  });
 
-    console.log("🔄 Obtendo conexão...");
+  socket.on("timeout", () => {
+    console.log("❌ TIMEOUT aguardando resposta do MySQL");
+    socket.destroy();
+  });
 
-    connection = await pool.getConnection();
+  socket.on("error", (error) => {
+    console.log("❌ ERRO:", error.message);
+  });
 
-    console.log("✅ AUTENTICAÇÃO MYSQL FUNCIONOU!");
-
-    const result = await connection.query("SELECT 1 AS result");
-
-    console.log("✅ SELECT FUNCIONOU:", result);
-
-    connection.release();
-    await pool.end();
-  } catch (error) {
-    console.error("❌ FALHA:");
-    console.error(error);
-
-    if (connection) {
-      connection.release();
-    }
-  }
+  socket.connect({
+    host: process.env.DATABASE_HOST || "srv540.hstgr.io",
+    port: Number(process.env.DATABASE_PORT || 3306),
+  });
 }
+

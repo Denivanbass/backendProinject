@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import mariadb from "mariadb";
+import { prisma } from "./lib/prisma.js";
 
 const app = express();
 
@@ -19,40 +19,22 @@ app.listen(3333, () => {
 });
 
 async function testarBanco() {
-  let connection;
-
   try {
-    console.log("🔄 Testando conexão com MySQL...");
+    console.log("🔄 Conectando ao MySQL...");
 
-    const pool = mariadb.createPool({
-      host: process.env.DATABASE_HOST,
-      port: Number(process.env.DATABASE_PORT || 3306),
-      user: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      connectionLimit: 1,
-      connectTimeout: 10000,
-    });
+    await prisma.$connect();
 
-    connection = await pool.getConnection();
+    console.log("✅ Prisma conectado!");
 
-    console.log("✅ MySQL conectado!");
+    console.log("🔄 Executando SELECT 1...");
 
-    const resultado = await connection.query(
-      "SELECT 1 AS result"
-    );
+    const resultado = await prisma.$queryRaw`
+      SELECT 1 AS result
+    `;
 
-    console.log("✅ MySQL respondeu:", resultado);
-
-    connection.release();
-
-    await pool.end();
+    console.log("✅ Banco respondeu:", resultado);
   } catch (error) {
-    console.error("❌ Erro ao conectar no MySQL:");
+    console.error("❌ Erro no banco:");
     console.error(error);
-
-    if (connection) {
-      connection.release();
-    }
   }
 }

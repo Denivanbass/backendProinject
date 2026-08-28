@@ -11,6 +11,13 @@ console.log("NODE VERSION:", process.version);
 console.log("NODE EXEC PATH:", process.execPath);
 
 
+console.log("DATABASE_HOST:", process.env.DATABASE_HOST);
+console.log("DATABASE_PORT:", process.env.DATABASE_PORT);
+console.log("DATABASE_USER:", process.env.DATABASE_USER);
+console.log("DATABASE_NAME:", process.env.DATABASE_NAME);
+console.log("DATABASE_URL HOST:", process.env.DATABASE_URL?.split("@")[1]);
+
+
 const app = express();
 app.use(express.json());
 app.use(cors())

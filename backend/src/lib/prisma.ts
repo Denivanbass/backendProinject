@@ -11,18 +11,6 @@ const adapter = new PrismaMariaDb({
   connectionLimit: 5,
 });
 
-const prisma = new PrismaClient({ adapter });
-
-
-
-
-
-console.log({
-  host: process.env.DATABASE_HOST,
-  port: process.env.DATABASE_PORT,
-  user: process.env.DATABASE_USER,
-  database: process.env.DATABASE_NAME,
+export const prisma = new PrismaClient({
+  adapter,
 });
-
-
-export { prisma };

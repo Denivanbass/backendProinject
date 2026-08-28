@@ -1,40 +1,58 @@
+import "dotenv/config";
 import express from "express";
-import { prisma } from "./lib/prisma.js";
-import { BuscarColaboradorController } from "./controllers/colaborador/BuscarColaboradorController.js";
-import { router } from "./routes.js";
+import mariadb from "mariadb";
+
 const app = express();
 
 app.use(express.json());
 
-// suas rotas
-// app.use("/users", userRoutes);
-// app.use("/auth", authRoutes);
-// etc.
-router.get('/colaborador', new BuscarColaboradorController().handle) // ok
+app.get("/", (req, res) => {
+  res.json({
+    message: "API funcionando!",
+  });
+});
 
 app.listen(3333, () => {
   console.log("Servidor Rodando na porta 3333!!");
 
-  testDatabase();
+  testarBanco();
 });
 
-async function testDatabase() {
+async function testarBanco() {
+  let connection;
+
   try {
     console.log("🔄 Testando conexão com MySQL...");
 
-    await prisma.$connect();
+    const pool = mariadb.createPool({
+      host: process.env.DATABASE_HOST,
+      port: Number(process.env.DATABASE_PORT || 3306),
+      user: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_NAME,
+      connectionLimit: 1,
+      connectTimeout: 10000,
+    });
+
+    connection = await pool.getConnection();
 
     console.log("✅ MySQL conectado!");
 
-    console.log("🔄 Executando SELECT 1...");
+    const resultado = await connection.query(
+      "SELECT 1 AS result"
+    );
 
-    const result = await prisma.$queryRaw`SELECT 1 AS result`;
+    console.log("✅ MySQL respondeu:", resultado);
 
-    console.log("✅ SELECT 1 respondeu:", result);
+    connection.release();
+
+    await pool.end();
   } catch (error) {
-    console.error("❌ Falha no banco:");
+    console.error("❌ Erro ao conectar no MySQL:");
     console.error(error);
+
+    if (connection) {
+      connection.release();
+    }
   }
 }
-
-

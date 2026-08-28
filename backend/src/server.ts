@@ -1,42 +1,46 @@
-// Arquivo Servidor
-
-
-import express, { Request, Response, NextFunction } from 'express';
-import { router } from './routes.js';
-import cors from 'cors';
-import path from 'path';
-
+import "dotenv/config";
+import express from "express";
+import mariadb from "mariadb";
 
 const app = express();
-app.use(express.json());
-app.use(cors())
 
-app.use(router);
-
-app.use(
-    '/files',
-    express.static(path.resolve(__dirname, '..', 'tmp'))
-)
-
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    if (err instanceof Error) {
-        return res.status(400).json({
-            error: err.message
-        })
-    }
-    return res.status(500).json({
-        status: 'error',
-        message:'Internal server error.'
-    })
-})
-
-// 1. Convertemos a porta para Número puro (Number)
-const PORT = process.env.PORT ? Number(process.env.PORT) : 3333;
-
-
-app.listen(PORT, () => {
-    console.log(`Servidor Rodando na porta ${PORT}!!`);
+app.get("/", (req, res) => {
+  res.json({
+    message: "API funcionando!",
+  });
 });
 
+app.listen(3333, () => {
+  console.log("Servidor Rodando na porta 3333!!");
+  testarMariaDB();
+});
 
-// Senha do banco de dados postgreSQL: user: admin   | senha: admin
+async function testarMariaDB() {
+  let connection;
+
+  try {
+    console.log("🔄 Abrindo conexão direta...");
+
+    connection = await mariadb.createConnection({
+      host: process.env.DATABASE_HOST!,
+      port: Number(process.env.DATABASE_PORT || 3306),
+      user: process.env.DATABASE_USER!,
+      password: process.env.DATABASE_PASSWORD!,
+      database: process.env.DATABASE_NAME!,
+      connectTimeout: 15000,
+    });
+
+    console.log("✅ CONEXÃO DIRETA FUNCIONOU!");
+
+    const result = await connection.query("SELECT 1 AS result");
+
+    console.log("✅ SELECT FUNCIONOU:", result);
+  } catch (error) {
+    console.error("❌ ERRO NA CONEXÃO DIRETA:");
+    console.error(error);
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
+  }
+}
